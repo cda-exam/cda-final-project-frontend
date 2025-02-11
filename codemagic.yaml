@@ -1,0 +1,6 @@
+workflows:
+  my_workflow:
+    name: CDA-FINAL-FRONTEND
+    integrations:
+      github:
+        check_status: true
