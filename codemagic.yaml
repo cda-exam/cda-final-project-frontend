@@ -1,0 +1,5 @@
+workflows:
+  my_workflow:
+    integrations:
+      github:
+        check_status: true
