@@ -91,27 +91,10 @@ class _LoginPageState extends State<LoginPage> {
 
                   if (!keyboardVisible) ...[
                     // Logo principal
-                    Container(
+                    SizedBox(
                       width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: primaryGreen,
-                        borderRadius: BorderRadius.circular(25),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primaryGreen.withOpacity(0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.lock_person,
-                        color: Colors.white,
-                        size: 50,
-                      ),
+                      height: 20,
                     ),
-                    const SizedBox(height: 30),
                   ],
 
                   // Titre
