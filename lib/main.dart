@@ -1,5 +1,7 @@
-import 'package:cda_final_project_frontend/widgets/login.dart';
 import 'package:flutter/material.dart';
+
+import 'pages/login.dart';
+import 'pages/sign-up.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,7 +24,7 @@ class MyApp extends StatelessWidget {
             200: Color(0xFF9FB1A3),
             300: Color(0xFF79927E),
             400: Color(0xFF5C7A63),
-            500: Color(0xFF2F5233), // Votre couleur principale
+            500: Color(0xFF2F5233), // Couleur principale
             600: Color(0xFF2A4A2E),
             700: Color(0xFF244027),
             800: Color(0xFF1E3620),
@@ -51,17 +53,16 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       // Option 1: Définir directement la page de connexion comme home
-      home: const LoginPage(),
+      // home: const LoginPage(),
 
       // Option 2: Utiliser des routes nommées (recommandé pour des apps plus complexes)
-      /*
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
+        '/signup': (context) => const SignupPage(),
         '/home': (context) => const HomePage(), // Votre page principale après connexion
         // Ajoutez d'autres routes selon vos besoins
       },
-      */
     );
   }
 }

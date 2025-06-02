@@ -1,3 +1,4 @@
+import 'package:cda_final_project_frontend/pages/sign-up.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -420,7 +421,12 @@ class _LoginPageState extends State<LoginPage> {
                       child: OutlinedButton(
                         onPressed: () {
                           HapticFeedback.selectionClick();
-                          // Navigation vers page d'inscription
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SignupPage(),
+                            ),
+                          );
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: accentBrown,
