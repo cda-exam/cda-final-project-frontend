@@ -1,3 +1,4 @@
+import 'package:cda_final_project_frontend/widgets/login.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -7,119 +8,153 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Mon Application',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: MaterialColor(
+          0xFF2F5233,
+          const <int, Color>{
+            50: Color(0xFFE8ECE9),
+            100: Color(0xFFC5D0C8),
+            200: Color(0xFF9FB1A3),
+            300: Color(0xFF79927E),
+            400: Color(0xFF5C7A63),
+            500: Color(0xFF2F5233), // Votre couleur principale
+            600: Color(0xFF2A4A2E),
+            700: Color(0xFF244027),
+            800: Color(0xFF1E3620),
+            900: Color(0xFF152614),
+          },
+        ),
+        // Configuration de la police Jost comme police par défaut
+        fontFamily: 'Jost',
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w300),
+          displayMedium: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w400),
+          displaySmall: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w400),
+          headlineLarge: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w600),
+          headlineMedium: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w600),
+          headlineSmall: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w600),
+          titleLarge: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w600),
+          titleMedium: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w500),
+          titleSmall: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w500),
+          bodyLarge: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w400),
+          bodyMedium: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w400),
+          bodySmall: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w400),
+          labelLarge: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w500),
+          labelMedium: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w500),
+          labelSmall: TextStyle(fontFamily: 'Jost', fontWeight: FontWeight.w500),
+        ),
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      // Option 1: Définir directement la page de connexion comme home
+      home: const LoginPage(),
+
+      // Option 2: Utiliser des routes nommées (recommandé pour des apps plus complexes)
+      /*
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const HomePage(), // Votre page principale après connexion
+        // Ajoutez d'autres routes selon vos besoins
+      },
+      */
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+// Exemple d'une page d'accueil après connexion
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: const Text('Accueil'),
+        backgroundColor: const Color(0xFF2F5233),
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              // Retour à la page de connexion
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
+          ),
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      body: const Center(
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+          children: [
+            Icon(
+              Icons.home,
+              size: 100,
+              color: Color(0xFF2F5233),
             ),
+            SizedBox(height: 20),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              'Bienvenue sur votre application !',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF373737),
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Vous êtes maintenant connecté.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(0xFF989898),
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+// Alternative : Classe pour gérer l'état de connexion
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  bool isLoggedIn = false; // Vous pouvez gérer cela avec SharedPreferences ou un state manager
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    // Vérifiez si l'utilisateur est déjà connecté
+    // Par exemple avec SharedPreferences :
+    /*
+    final prefs = await SharedPreferences.getInstance();
+    final bool loggedIn = prefs.getBool('isLoggedIn') ?? false;
+    setState(() {
+      isLoggedIn = loggedIn;
+    });
+    */
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Retourne la page appropriée selon l'état de connexion
+    return isLoggedIn ? const HomePage() : const LoginPage();
   }
 }
