@@ -28,10 +28,10 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
   List.generate(6, (index) => FocusNode());
 
   bool _isLoading = false;
-  bool _isResending = false;
+  final bool _isResending = false;
 
   // Countdown pour le renvoi
-  int _resendCountdown = 0;
+  final int _resendCountdown = 0;
   Timer? _resendTimer;
 
   // Animation

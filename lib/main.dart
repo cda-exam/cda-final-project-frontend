@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'pages/login.dart';
 import 'pages/sign-up.dart';
+import 'pages/home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -52,110 +53,13 @@ class MyApp extends StatelessWidget {
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      // Option 1: Définir directement la page de connexion comme home
-      // home: const LoginPage(),
 
-      // Option 2: Utiliser des routes nommées (recommandé pour des apps plus complexes)
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
-        '/home': (context) => const HomePage(), // Votre page principale après connexion
-        // Ajoutez d'autres routes selon vos besoins
+        '/home': (context) => const HomePage(),
       },
     );
-  }
-}
-
-// Exemple d'une page d'accueil après connexion
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Accueil'),
-        backgroundColor: const Color(0xFF2F5233),
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              // Retour à la page de connexion
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.home,
-              size: 100,
-              color: Color(0xFF2F5233),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Bienvenue sur votre application !',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF373737),
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Vous êtes maintenant connecté.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF989898),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// Alternative : Classe pour gérer l'état de connexion
-class AuthWrapper extends StatefulWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  State<AuthWrapper> createState() => _AuthWrapperState();
-}
-
-class _AuthWrapperState extends State<AuthWrapper> {
-  bool isLoggedIn = false; // Vous pouvez gérer cela avec SharedPreferences ou un state manager
-
-  @override
-  void initState() {
-    super.initState();
-    _checkLoginStatus();
-  }
-
-  Future<void> _checkLoginStatus() async {
-    // Vérifiez si l'utilisateur est déjà connecté
-    // Par exemple avec SharedPreferences :
-    /*
-    final prefs = await SharedPreferences.getInstance();
-    final bool loggedIn = prefs.getBool('isLoggedIn') ?? false;
-    setState(() {
-      isLoggedIn = loggedIn;
-    });
-    */
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Retourne la page appropriée selon l'état de connexion
-    return isLoggedIn ? const HomePage() : const LoginPage();
   }
 }
