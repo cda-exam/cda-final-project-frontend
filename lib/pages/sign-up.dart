@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../services/sign-up-service.dart';
 import '../services/api-service.dart';
 import 'email-verification.dart';
+import '../constants/colors.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -22,14 +23,6 @@ class _SignupPageState extends State<SignupPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
-
-  // Couleurs du thème
-  static const Color primaryGreen = Color(0xFF2E7D32);
-  static const Color lightGreen = Color(0xFFE8F5E8);
-  static const Color darkGray = Color(0xFF2C2C2C);
-  static const Color mediumGray = Color(0xFF666666);
-  static const Color lightGray = Color(0xFFF5F5F5);
-  static const Color errorRed = Color(0xFFD32F2F);
 
   @override
   void dispose() {
@@ -120,7 +113,7 @@ class _SignupPageState extends State<SignupPage> {
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: primaryGreen,
+        backgroundColor: AppColors.primaryGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
@@ -138,7 +131,7 @@ class _SignupPageState extends State<SignupPage> {
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: errorRed,
+        backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
@@ -177,7 +170,7 @@ class _SignupPageState extends State<SignupPage> {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: darkGray,
+            color: AppColors.darkGray,
           ),
         ),
         const SizedBox(height: 8),
@@ -189,19 +182,19 @@ class _SignupPageState extends State<SignupPage> {
           style: const TextStyle(fontSize: 16),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: mediumGray.withOpacity(0.7)),
-            prefixIcon: Icon(icon, color: mediumGray),
+            hintStyle: TextStyle(color: AppColors.mediumGray.withOpacity(0.7)),
+            prefixIcon: Icon(icon, color: AppColors.mediumGray),
             suffixIcon: showToggle
                 ? IconButton(
               icon: Icon(
                 obscureText ? Icons.visibility : Icons.visibility_off,
-                color: mediumGray,
+                color: AppColors.mediumGray,
               ),
               onPressed: onToggleVisibility,
             )
                 : null,
             filled: true,
-            fillColor: lightGray,
+            fillColor: AppColors.lightGray,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -212,15 +205,15 @@ class _SignupPageState extends State<SignupPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: primaryGreen, width: 2),
+              borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: errorRed, width: 2),
+              borderSide: const BorderSide(color: AppColors.error, width: 2),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: errorRed, width: 2),
+              borderSide: const BorderSide(color: AppColors.error, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
@@ -237,7 +230,7 @@ class _SignupPageState extends State<SignupPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: darkGray),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.darkGray),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -255,7 +248,7 @@ class _SignupPageState extends State<SignupPage> {
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: darkGray,
+                    color: AppColors.darkGray,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -263,7 +256,7 @@ class _SignupPageState extends State<SignupPage> {
                   'Rejoignez notre communauté dès maintenant',
                   style: TextStyle(
                     fontSize: 16,
-                    color: mediumGray,
+                    color: AppColors.mediumGray,
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -375,7 +368,7 @@ class _SignupPageState extends State<SignupPage> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _handleSignup,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryGreen,
+                          backgroundColor: AppColors.primaryGreen,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -409,7 +402,7 @@ class _SignupPageState extends State<SignupPage> {
                         Text(
                           'Déjà un compte ? ',
                           style: TextStyle(
-                            color: mediumGray,
+                            color: AppColors.mediumGray,
                             fontSize: 16,
                           ),
                         ),
@@ -418,7 +411,7 @@ class _SignupPageState extends State<SignupPage> {
                           child: const Text(
                             'Se connecter',
                             style: TextStyle(
-                              color: primaryGreen,
+                              color: AppColors.primaryGreen,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),

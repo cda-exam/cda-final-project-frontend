@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import '../services/sign-up-service.dart';
 import '../services/api-service.dart';
+import '../constants/colors.dart';
 
 class EmailVerificationPage extends StatefulWidget {
   final String email;
@@ -37,14 +38,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
   // Animation
   late AnimationController _shakeController;
   late Animation<double> _shakeAnimation;
-
-  // Couleurs
-  static const Color primaryGreen = Color(0xFF2E7D32);
-  static const Color lightGreen = Color(0xFFE8F5E8);
-  static const Color darkGray = Color(0xFF2C2C2C);
-  static const Color mediumGray = Color(0xFF666666);
-  static const Color lightGray = Color(0xFFF5F5F5);
-  static const Color errorRed = Color(0xFFD32F2F);
 
   @override
   void initState() {
@@ -178,7 +171,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: primaryGreen,
+        backgroundColor: AppColors.primaryGreen,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
@@ -196,7 +189,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: errorRed,
+        backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
@@ -212,13 +205,13 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: darkGray),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.darkGray),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Vérification Email',
           style: TextStyle(
-            color: darkGray,
+            color: AppColors.darkGray,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
@@ -239,13 +232,13 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: lightGreen,
+                        color: AppColors.primaryGreen,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.email_outlined,
                         size: 50,
-                        color: primaryGreen,
+                        color: AppColors.primaryGreen,
                       ),
                     ),
 
@@ -257,7 +250,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: darkGray,
+                        color: AppColors.darkGray,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -270,7 +263,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
                       text: TextSpan(
                         style: const TextStyle(
                           fontSize: 16,
-                          color: mediumGray,
+                          color: AppColors.mediumGray,
                           height: 1.5,
                         ),
                         children: [
@@ -279,7 +272,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
                             text: widget.email,
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: primaryGreen,
+                              color: AppColors.primaryGreen,
                             ),
                           ),
                         ],
@@ -301,11 +294,11 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
                                 width: 45,
                                 height: 55,
                                 decoration: BoxDecoration(
-                                  color: lightGray,
+                                  color: AppColors.lightGray,
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: _focusNodes[index].hasFocus
-                                        ? primaryGreen
+                                        ? AppColors.primaryGreen
                                         : Colors.transparent,
                                     width: 2,
                                   ),
@@ -319,7 +312,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
                                   style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: darkGray,
+                                    color: AppColors.darkGray,
                                   ),
                                   decoration: const InputDecoration(
                                     border: InputBorder.none,
@@ -346,7 +339,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _verifyCode,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryGreen,
+                          backgroundColor: AppColors.primaryGreen,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -385,7 +378,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage>
                   icon: const Icon(Icons.arrow_back, size: 18),
                   label: const Text('Retour à l\'inscription'),
                   style: TextButton.styleFrom(
-                    foregroundColor: mediumGray,
+                    foregroundColor: AppColors.mediumGray,
                   ),
                 ),
               ),
