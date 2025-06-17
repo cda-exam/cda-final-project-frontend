@@ -1,5 +1,5 @@
 class User {
-  final String id;
+  final String? id;
   final String email;
   final String nickname;
   final String? city;
@@ -7,7 +7,7 @@ class User {
   final String? profilePicture;
 
   User({
-    required this.id,
+    this.id,
     required this.email,
     required this.nickname,
     this.city,
@@ -20,15 +20,15 @@ class User {
       id: json['id'],
       email: json['email'],
       nickname: json['nickname'],
-      city: json['city'] ?? '',
-      description: json['description'] ?? '',
-      profilePicture: json['profilePicture'] ?? ''
+      city: json['city'],
+      description: json['description'],
+      profilePicture: json['profilePicture'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'id': id ?? '',
       'email': email,
       'nickname': nickname,
       'city': city ?? '',
