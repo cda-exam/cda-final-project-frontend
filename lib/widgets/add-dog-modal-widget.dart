@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'dart:convert';
 import '../constants/colors.dart';
+import '../models/dog.dart';
+import '../services/dog-service.dart';
+import '../services/auth-service.dart';
 
-/// Modèle pour représenter un chien
-class Dog {
+/// Modèle UI pour représenter un chien dans l'interface
+class UIDog {
   final String name;
   final String breed;
   final DateTime birthDate;
@@ -12,7 +16,7 @@ class Dog {
   final String? description;
   final File? photo;
 
-  Dog({
+  UIDog({
     required this.name,
     required this.breed,
     required this.birthDate,
@@ -24,7 +28,7 @@ class Dog {
 
 /// Modal pour ajouter un nouveau chien
 class AddDogModal extends StatefulWidget {
-  final Function(Dog dog)? onDogAdded;
+  final Function(UIDog dog)? onDogAdded;
 
   const AddDogModal({
     super.key,
@@ -34,7 +38,7 @@ class AddDogModal extends StatefulWidget {
   /// Méthode statique pour afficher la modal facilement
   static Future<void> show(
       BuildContext context, {
-        Function(Dog dog)? onDogAdded,
+        Function(UIDog dog)? onDogAdded,
       }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -105,7 +109,7 @@ class _AddDogModalState extends State<AddDogModal> {
       initialDate: _selectedBirthDate,
       firstDate: DateTime.now().subtract(const Duration(days: 365 * 25)), // 25 ans max
       lastDate: DateTime.now(),
-      locale: const Locale('fr', 'FR'),
+      // Suppression de la locale française qui causait l'erreur
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -148,20 +152,50 @@ class _AddDogModalState extends State<AddDogModal> {
     });
 
     try {
-      final dog = Dog(
+      // Récupérer l'utilisateur connecté
+      final authData = await AuthService().getStoredAuthData();
+      final userId = authData.user?.id;
+      
+      if (userId == null) {
+        throw Exception('Utilisateur non connecté');
+      }
+
+      // Préparer l'image si elle existe
+      String photoUrl = '';
+      if (_selectedPhoto != null) {
+        try {
+          photoUrl = await DogService.uploadDogImage(_selectedPhoto!);
+        } catch (e) {
+          print('Erreur lors de l\'upload de l\'image: $e');
+          // Continuer sans image si l'upload échoue
+        }
+      }
+
+      // Créer le chien selon le format attendu par l'API
+      final dogToAdd = Dog(
         name: _nameController.text.trim(),
-        breed: _breedController.text.trim(),
-        birthDate: _selectedBirthDate,
-        gender: _selectedGender,
+        birthday: _selectedBirthDate,
         description: _descriptionController.text.trim(),
-        photo: _selectedPhoto,
+        photo: photoUrl,
+        breed: _breedController.text.trim(),
+        sex: _selectedGender, // 'male' ou 'female'
       );
 
-      // Simulation d'un délai d'API
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Envoyer au backend
+      await DogService.addDogToUser(userId, dogToAdd);
 
+      // Notifier le parent si nécessaire
       if (widget.onDogAdded != null) {
-        widget.onDogAdded!(dog);
+        // Convertir le modèle API en modèle UI
+        final uiDog = UIDog(
+          name: dogToAdd.name,
+          breed: dogToAdd.breed,
+          birthDate: dogToAdd.birthday,
+          gender: dogToAdd.sex,
+          description: dogToAdd.description,
+          photo: _selectedPhoto,
+        );
+        widget.onDogAdded!(uiDog);
       }
 
       if (mounted) {
@@ -175,7 +209,7 @@ class _AddDogModalState extends State<AddDogModal> {
               children: [
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 8),
-                Text('${dog.name} a été ajouté avec succès !'),
+                Text('${_nameController.text} a été ajouté avec succès !'),
               ],
             ),
             backgroundColor: AppColors.primaryGreen,
@@ -186,8 +220,8 @@ class _AddDogModalState extends State<AddDogModal> {
         );
       }
 
-      print('🐕 Chien ajouté: ${dog.name}, ${dog.breed}, ${dog.gender}');
-      print('📅 Né le: ${_formatDate(dog.birthDate)} (${_calculateAge(dog.birthDate)} ans)');
+      print('🐕 Chien ajouté: ${_nameController.text}, ${_breedController.text}, $_selectedGender');
+      print('📅 Né le: ${_formatDate(_selectedBirthDate)} (${_calculateAge(_selectedBirthDate)} ans)');
     
     } catch (e) {
       if (mounted) {

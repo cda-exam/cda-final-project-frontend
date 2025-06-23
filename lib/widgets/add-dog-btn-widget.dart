@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
+import '../services/dog-service.dart';
+import '../models/dog.dart';
+import 'add-dog-modal-widget.dart';
 
 /// Widget des boutons flottants pour la HomePage
 class AddDogBtn extends StatelessWidget {

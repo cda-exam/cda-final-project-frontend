@@ -5,9 +5,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import '../constants/colors.dart';
 import '../services/location-service.dart';
+import '../services/auth-service.dart';
+import '../services/user-image-service.dart';
+import '../models/user.dart';
 import '../widgets/map-widget.dart';
 import '../widgets/loading-widget.dart';
-import '../widgets/add-dog-modal-widget.dart';
+import '../widgets/add-dog-modal-widget.dart' show AddDogModal, UIDog;
 import '../widgets/add-dog-btn-widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,6 +26,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _isLoadingLocation = true;
   late AnimationController _fabController;
   late AnimationController _locationButtonController;
+  
+  // Informations utilisateur
+  User? _currentUser;
+  bool _isLoadingUser = true;
 
   @override
   void initState() {
@@ -39,6 +46,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
 
     _getCurrentLocation();
+    _loadUserData();
   }
 
   @override
@@ -135,18 +143,86 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _handleAddDog() {
-    AddDogModal.show(
-      context,
-      onDogAdded: _onDogAdded,
-    );
+    AddDogModal.show(context, onDogAdded: _onDogAdded);
   }
 
-  void _onDogAdded(Dog dog) {
-    // TODO: Rafraîchir la liste des chiens ou mettre à jour l'état
-    // setState(() {
-    //   // Mettre à jour la liste des chiens
-    // });
-    print('dog added : ' + dog.name);
+  void _onDogAdded(UIDog dog) {
+    // Afficher un message de confirmation
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${dog.name} a été ajouté à votre profil'),
+        backgroundColor: AppColors.primaryGreen,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    
+    // Ici, vous pourriez recharger la liste des chiens de l'utilisateur
+    // si vous affichez cette liste quelque part dans l'interface
+    // Exemple: _loadUserDogs();
+    
+    // Pour l'instant, on se contente d'un log
+    print('Dog added: ${dog.name}, ${dog.breed}, ${_formatDate(dog.birthDate)}');
+  }
+  
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+  
+  /// Charge les données de l'utilisateur connecté
+  Future<void> _loadUserData() async {
+    setState(() {
+      _isLoadingUser = true;
+    });
+    
+    try {
+      final authData = await AuthService().getStoredAuthData();
+      setState(() {
+        _currentUser = authData.user;
+        _isLoadingUser = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingUser = false;
+      });
+      print('Erreur lors du chargement des données utilisateur: $e');
+    }
+  }
+  
+  /// Construit l'avatar de l'utilisateur
+  Widget _buildUserAvatar() {
+    // Si les données utilisateur sont en cours de chargement
+    if (_isLoadingUser) {
+      return const SizedBox(
+        width: 48,
+        height: 48,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGreen),
+        ),
+      );
+    }
+    
+    // Si l'utilisateur a une image de profil
+    if (_currentUser != null && UserImageService.hasProfileImage(_currentUser!.profilePicture)) {
+      final imageUrl = UserImageService.getProfileImageUrl(_currentUser!.profilePicture);
+      return CircleAvatar(
+        radius: 24,
+        backgroundColor: AppColors.lightGray,
+        backgroundImage: NetworkImage(imageUrl),
+      );
+    }
+    
+    // Avatar par défaut
+    return const CircleAvatar(
+      radius: 24,
+      backgroundColor: AppColors.primaryGreen,
+      child: Icon(
+        Icons.person,
+        size: 26,
+        color: Colors.white,
+      ),
+    );
   }
 
   void _handleNewWalk() {
@@ -202,16 +278,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             onRetry: _getCurrentLocation,
           ),
 
-          // Titre de l'app (en haut à gauche)
+          // Avatar utilisateur (en haut à gauche)
           SafeArea(
             child: Positioned(
-              top: 16,
-              left: 16,
+              top: 30,
+              left: 30,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95),
-                  borderRadius: BorderRadius.circular(25),
+                  color: Colors.white.withOpacity(0.8),
+                  shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
@@ -220,21 +296,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                   ],
                 ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.pets, color: AppColors.primaryGreen, size: 20),
-                    SizedBox(width: 8),
-                    Text(
-                      'Promenades',
-                      style: TextStyle(
-                        color: AppColors.darkGray,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
+                child: _buildUserAvatar(),
               ),
             ),
           ),
