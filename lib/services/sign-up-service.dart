@@ -25,6 +25,7 @@ class SignUpService {
     required String email,
     required String password,
     String? city,
+    String? profilePicture,
   }) async {
     try {
       // Préparer les données utilisateur
@@ -37,6 +38,11 @@ class SignUpService {
       // Ajouter la ville si fournie
       if (city != null && city.isNotEmpty) {
         userData['city'] = city;
+      }
+      
+      // Ajouter l'ID de l'image de profil si fournie
+      if (profilePicture != null && profilePicture.isNotEmpty) {
+        userData['profilePicture'] = profilePicture;
       }
 
       // Appel à la route register

@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/sign-up-service.dart';
 import '../services/api-service.dart';
+import '../services/user-image-service.dart';
 import 'email-verification.dart';
 import '../constants/colors.dart';
 
@@ -23,6 +26,10 @@ class _SignupPageState extends State<SignupPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
+  bool _isUploadingImage = false;
+  
+  File? _profileImage;
+  String? _profileImageId;
 
   @override
   void dispose() {
@@ -32,6 +39,89 @@ class _SignupPageState extends State<SignupPage> {
     _confirmPasswordController.dispose();
     _cityController.dispose();
     super.dispose();
+  }
+  
+  /// Sélectionne une image depuis la galerie ou l'appareil photo
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? pickedImage = await picker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+      
+      if (pickedImage != null) {
+        setState(() {
+          _profileImage = File(pickedImage.path);
+          _profileImageId = null; // Réinitialiser l'ID car nouvelle image
+        });
+      }
+    } catch (e) {
+      _showErrorMessage('Erreur lors de la sélection de l\'image: $e');
+    }
+  }
+  
+  /// Affiche une boîte de dialogue pour choisir la source de l'image
+  Future<void> _showImageSourceDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Choisir une image de profil'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galerie'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Appareil photo'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Annuler'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  /// Upload l'image de profil sélectionnée
+  Future<String?> _uploadProfileImage() async {
+    if (_profileImage == null) return null;
+    
+    setState(() {
+      _isUploadingImage = true;
+    });
+    
+    try {
+      final imageId = await UserImageService.uploadProfileImage(_profileImage!);
+      setState(() {
+        _profileImageId = imageId;
+        _isUploadingImage = false;
+      });
+      return imageId;
+    } catch (e) {
+      setState(() {
+        _isUploadingImage = false;
+      });
+      _showErrorMessage('Erreur lors de l\'upload de l\'image: $e');
+      return null;
+    }
   }
 
   bool _validateForm() {
@@ -49,6 +139,19 @@ class _SignupPageState extends State<SignupPage> {
     setState(() {
       _isLoading = true;
     });
+    
+    // Upload de l'image de profil si disponible
+    String? imageId;
+    if (_profileImage != null) {
+      imageId = await _uploadProfileImage();
+      if (imageId == null && _isLoading) {
+        // Si l'upload a échoué mais que l'inscription n'a pas été annulée
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+    }
 
     try {
       final response = await SignUpService.signup(
@@ -58,6 +161,7 @@ class _SignupPageState extends State<SignupPage> {
         city: _cityController.text.trim().isNotEmpty
             ? _cityController.text.trim()
             : null,
+        profilePicture: imageId,
       );
 
       setState(() {
@@ -358,6 +462,90 @@ class _SignupPageState extends State<SignupPage> {
                       hint: 'Votre ville',
                       icon: Icons.location_on_outlined,
                       validator: (value) => null, // Optionnel
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Sélection de photo de profil
+                    InkWell(
+                      onTap: _isLoading ? null : _showImageSourceDialog,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.lightGray),
+                        ),
+                        child: Row(
+                          children: [
+                            // Aperçu de l'image ou icône par défaut
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: AppColors.lightGray,
+                                shape: BoxShape.circle,
+                                image: _profileImage != null
+                                    ? DecorationImage(
+                                        image: FileImage(_profileImage!),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null,
+                              ),
+                              child: _profileImage == null
+                                  ? const Icon(
+                                      Icons.add_a_photo,
+                                      color: AppColors.mediumGray,
+                                      size: 30,
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(width: 16),
+                            // Texte explicatif
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _profileImage == null
+                                        ? 'Ajouter une photo de profil'
+                                        : 'Changer la photo',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.darkGray,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Optionnel - Formats JPG ou PNG',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: AppColors.mediumGray,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Indicateur de chargement ou icône
+                            _isUploadingImage
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.primaryGreen,
+                                      ),
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 16,
+                                    color: AppColors.mediumGray,
+                                  ),
+                          ],
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 30),
 
