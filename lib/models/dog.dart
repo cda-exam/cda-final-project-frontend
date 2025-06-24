@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 class Dog {
   final String? id;

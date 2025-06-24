@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:cda_final_project_frontend/services/api-service.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -62,14 +61,15 @@ class UserImageService {
       
       // Vérifier la réponse
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final responseData = json.decode(response.body);
-        if (responseData['id'] != null) {
-          return responseData['id'];
+        final body = response.body.trim();
+        // Retourner directement la chaîne reçue (l'id)
+        if (body.isNotEmpty) {
+          return body;
         } else {
-          throw Exception('ID d\'image non trouvé dans la réponse');
+          throw Exception('Réponse vide lors de l\'upload de l\'image');
         }
       } else {
-        throw Exception('Erreur lors de l\'upload de l\'image: ${response.statusCode}');
+        throw Exception('Erreur lors de l\'upload de l\'image: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       throw Exception('Erreur lors de l\'upload de l\'image: $e');

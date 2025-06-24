@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -279,10 +278,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
 
           // Avatar utilisateur (en haut à gauche)
-          SafeArea(
-            child: Positioned(
-              top: 30,
-              left: 30,
+          Positioned(
+            top: 20,
+            left: 20,
+            child: SafeArea(
               child: Container(
                 padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
