@@ -1,4 +1,3 @@
-
 class Dog {
   final String? id;
   final String name;
@@ -33,9 +32,11 @@ class Dog {
   }
 
   Map<String, dynamic> toJson() {
+    // Format la date en timestamp (millisecondes depuis l'époque)
+    // Ce format est compatible avec java.util.Date
     return {
       'name': name,
-      'birthday': birthday.toIso8601String(),
+      'birthday': birthday.millisecondsSinceEpoch,
       'description': description,
       'photo': photo,
       'breed': breed,

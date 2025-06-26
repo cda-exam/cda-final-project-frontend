@@ -5,6 +5,7 @@ import '../constants/colors.dart';
 import '../models/dog.dart';
 import '../services/dog-service.dart';
 import '../services/auth-service.dart';
+import '../services/dog-image-service.dart';
 
 /// Modèle UI pour représenter un chien dans l'interface
 class UIDog {
@@ -152,22 +153,35 @@ class _AddDogModalState extends State<AddDogModal> {
 
     try {
       // Récupérer l'utilisateur connecté
+      print('Récupération des données d\'authentification...');
       final authData = await AuthService().getStoredAuthData();
+      print('Données d\'authentification récupérées: token=${authData.token != null ? "présent" : "absent"}, user=${authData.user != null ? "présent" : "absent"}');
+
       final userId = authData.user?.id;
-      
-      if (userId == null) {
-        throw Exception('Utilisateur non connecté');
+      print('ID utilisateur récupéré: ${userId ?? "inconnu"}');
+
+      // Vérification plus stricte de l'ID utilisateur
+      if (userId == null || userId.isEmpty) {
+        print('ERREUR: ID utilisateur invalide ou manquant');
+        throw Exception('Utilisateur non connecté ou ID utilisateur invalide. Veuillez vous reconnecter.');
       }
 
+      // Debug: vérifier la valeur de userId
+      print('Debug - userId avant appel API: "$userId"');
+
       // Préparer l'image si elle existe
-      String photoUrl = '';
+      String photoId = '';
       if (_selectedPhoto != null) {
         try {
-          photoUrl = await DogService.uploadDogImage(_selectedPhoto!);
+          print('Uploading dog image...');
+          photoId = await DogImageService.uploadDogImage(_selectedPhoto!);
+          print('Image uploaded successfully, ID: "$photoId"');
         } catch (e) {
           print('Erreur lors de l\'upload de l\'image: $e');
           // Continuer sans image si l'upload échoue
         }
+      } else {
+        print('No image selected for dog');
       }
 
       // Créer le chien selon le format attendu par l'API
@@ -175,12 +189,16 @@ class _AddDogModalState extends State<AddDogModal> {
         name: _nameController.text.trim(),
         birthday: _selectedBirthDate,
         description: _descriptionController.text.trim(),
-        photo: photoUrl,
+        photo: photoId,
         breed: _breedController.text.trim(),
         sex: _selectedGender, // 'male' ou 'female'
       );
 
+      // Debug: vérifier les données du chien
+      print('Dog data to send: ${dogToAdd.toJson()}');
+
       // Envoyer au backend
+      print('Debug - Appel à addDogToUser avec userId: "$userId"');
       await DogService.addDogToUser(userId, dogToAdd);
 
       // Notifier le parent si nécessaire
@@ -223,11 +241,15 @@ class _AddDogModalState extends State<AddDogModal> {
       print('📅 Né le: ${_formatDate(_selectedBirthDate)} (${_calculateAge(_selectedBirthDate)} ans)');
     
     } catch (e) {
+      print('ERREUR lors de l\'ajout du chien: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de l\'ajout: $e'),
             backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 5),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
           ),
         );
       }

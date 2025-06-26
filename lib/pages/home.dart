@@ -4,14 +4,15 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import '../constants/colors.dart';
-import '../services/location-service.dart';
-import '../services/auth-service.dart';
-import '../services/user-image-service.dart';
 import '../models/user.dart';
-import '../widgets/map-widget.dart';
+import '../models/dog.dart';
+import '../services/auth-service.dart';
+import '../services/location-service.dart';
+import '../services/user-image-service.dart';
 import '../widgets/loading-widget.dart';
-import '../widgets/add-dog-modal-widget.dart' show AddDogModal, UIDog;
+import '../widgets/map-widget.dart';
 import '../widgets/add-dog-btn-widget.dart';
+import '../widgets/add-dog-modal-widget.dart' show AddDogModal, UIDog;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -205,11 +206,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
     );
     
-    // Ici, vous pourriez recharger la liste des chiens de l'utilisateur
-    // si vous affichez cette liste quelque part dans l'interface
-    // Exemple: _loadUserDogs();
-    
-    // Pour l'instant, on se contente d'un log
     print('Dog added: ${dog.name}, ${dog.breed}, ${_formatDate(dog.birthDate)}');
   }
   
@@ -305,6 +301,93 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     print('Position tappée: ${tappedPoint.latitude}, ${tappedPoint.longitude}');
   }
 
+  void _showUserMenu(BuildContext context) {
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    showMenu(
+      context: context,
+      position: position,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 8,
+      items: [
+        PopupMenuItem(
+          value: 'profile',
+          child: Row(
+            children: [
+              Icon(Icons.person, color: AppColors.primaryGreen),
+              SizedBox(width: 12),
+              Text('Mon profil'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'dogs',
+          child: Row(
+            children: [
+              Icon(Icons.pets, color: AppColors.accentBrown),
+              SizedBox(width: 12),
+              Text('Mes chiens'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'settings',
+          child: Row(
+            children: [
+              Icon(Icons.settings, color: AppColors.darkGray),
+              SizedBox(width: 12),
+              Text('Paramètres'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'logout',
+          child: Row(
+            children: [
+              Icon(Icons.logout, color: AppColors.error),
+              SizedBox(width: 12),
+              Text('Déconnexion'),
+            ],
+          ),
+        ),
+      ],
+    ).then((value) {
+      if (value == 'profile') {
+        // Navigation vers la page de profil (à implémenter)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Page de profil - Fonctionnalité à venir'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else if (value == 'settings') {
+        // Navigation vers la page de paramètres (à implémenter)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Paramètres - Fonctionnalité à venir'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else if (value == 'logout') {
+        // Déconnexion (à implémenter)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Déconnexion - Fonctionnalité à venir'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -332,20 +415,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             top: 20,
             left: 20,
             child: SafeArea(
-              child: Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.8),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+              child: GestureDetector(
+                onTap: () {
+                  _showUserMenu(context);
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.8),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: _buildUserAvatar(),
                 ),
-                child: _buildUserAvatar(),
               ),
             ),
           ),
