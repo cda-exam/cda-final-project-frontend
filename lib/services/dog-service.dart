@@ -1,6 +1,7 @@
 import 'dart:io';
 import '../models/dog.dart';
 import 'api-service.dart';
+import 'dart:convert'; // Import pour jsonDecode
 
 class DogService {
   /// Ajoute un ou plusieurs chiens à un utilisateur
@@ -62,16 +63,34 @@ class DogService {
   /// Correspond à l'API: GET /dogs/{userId}
   static Future<List<Dog>> getUserDogs(String userId) async {
     try {
-      final response = await ApiService.get('/dogs/$userId');
-      
-      if (response['dogs'] != null) {
-        return (response['dogs'] as List)
-            .map((dogJson) => Dog.fromJson(dogJson))
-            .toList();
+      // Vérifier si userId est vide ou null
+      if (userId == null || userId.isEmpty) {
+        throw Exception('userId ne peut pas être vide ou null');
       }
       
-      return [];
+      // Assurons-nous que l'URL inclut bien l'ID utilisateur
+      final String endpoint = '/dogs/$userId';
+      
+      // Debug pour vérifier l'URL
+      print('Calling API endpoint: $endpoint with userId: $userId');
+      print('URL complète attendue: ${ApiService.baseUrl}$endpoint');
+      
+      // Utiliser la nouvelle méthode getList qui gère les tableaux JSON
+      final List<dynamic> response = await ApiService.getList(endpoint);
+      
+      print('API response for getUserDogs: $response');
+      
+      // Convertir chaque élément du tableau en objet Dog
+      List<Dog> dogs = [];
+      for (var dogJson in response) {
+        if (dogJson is Map<String, dynamic>) {
+          dogs.add(Dog.fromJson(dogJson));
+        }
+      }
+      
+      return dogs;
     } catch (e) {
+      print('Error in getUserDogs: $e');
       rethrow;
     }
   }

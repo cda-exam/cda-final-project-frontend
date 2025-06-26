@@ -42,7 +42,7 @@ class ApiService {
   }
 
   // Méthode générique pour les requêtes GET
-  static Future<Map<String, dynamic>> get(
+  static Future<dynamic> get(
       String endpoint, {
         Map<String, String>? queryParams,
         String? token,
@@ -67,8 +67,34 @@ class ApiService {
     }
   }
 
+  // Méthode générique pour les requêtes GET qui renvoient un tableau JSON
+  static Future<List<dynamic>> getList(
+      String endpoint, {
+        Map<String, String>? queryParams,
+        String? token,
+      }) async {
+    try {
+      Uri url = Uri.parse('$_baseUrl$endpoint');
+      if (queryParams != null) {
+        url = url.replace(queryParameters: queryParams);
+      }
+
+      if (kDebugMode) {
+        print('API GET (List): $url');
+      }
+
+      final response = await http
+          .get(url, headers: _getHeaders())
+          .timeout(_timeout);
+
+      return _handleListResponse(response);
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   // Méthode générique pour les requêtes POST
-  static Future<Map<String, dynamic>> post(
+  static Future<dynamic> post(
       String endpoint,
       Map<String, dynamic> data, {
         String? token,
@@ -96,7 +122,7 @@ class ApiService {
   }
 
   // Méthode pour upload de fichiers (multipart)
-  static Future<Map<String, dynamic>> postMultipart(
+  static Future<dynamic> postMultipart(
       String endpoint,
       Map<String, dynamic> data,
       Map<String, File> files, {
@@ -141,7 +167,7 @@ class ApiService {
   }
 
   // Méthode PUT
-  static Future<Map<String, dynamic>> put(
+  static Future<dynamic> put(
       String endpoint,
       Map<String, dynamic> data, {
         String? token,
@@ -169,7 +195,7 @@ class ApiService {
   }
 
   // Méthode DELETE
-  static Future<Map<String, dynamic>> delete(
+  static Future<dynamic> delete(
       String endpoint, {
         String? token,
       }) async {
@@ -191,7 +217,7 @@ class ApiService {
   }
 
   // Gestion des réponses
-  static Map<String, dynamic> _handleResponse(http.Response response) {
+  static dynamic _handleResponse(http.Response response) {
     if (kDebugMode) {
       print('API Response [${response.statusCode}]: ${response.body}');
     }
@@ -202,10 +228,49 @@ class ApiService {
       }
 
       try {
-        return jsonDecode(response.body);
+        // Décoder la réponse JSON (peut être un objet ou un tableau)
+        final dynamic decodedResponse = jsonDecode(response.body);
+        return decodedResponse;
       } catch (e) {
         throw ApiException(
           message: 'Erreur de format de réponse',
+          statusCode: response.statusCode,
+        );
+      }
+    } else {
+      Map<String, dynamic> errorBody = {};
+      try {
+        errorBody = jsonDecode(response.body);
+      } catch (e) {
+        errorBody = {'message': 'Erreur serveur'};
+      }
+
+      throw ApiException(
+        message: errorBody['message'] ?? 'Erreur inconnue',
+        statusCode: response.statusCode,
+        errors: errorBody['errors'],
+      );
+    }
+  }
+
+  // Gestion des réponses pour les tableaux JSON
+  static List<dynamic> _handleListResponse(http.Response response) {
+    if (kDebugMode) {
+      print('API Response [${response.statusCode}]: ${response.body}');
+    }
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.body.isEmpty) {
+        return [];
+      }
+
+      try {
+        // Décoder la réponse JSON comme un tableau
+        final List<dynamic> decodedResponse = jsonDecode(response.body);
+        return decodedResponse;
+      } catch (e) {
+        throw ApiException(
+          message: 'Erreur de format de réponse: la réponse n\'est pas un tableau JSON valide',
           statusCode: response.statusCode,
         );
       }

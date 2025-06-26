@@ -7,12 +7,14 @@ import '../constants/colors.dart';
 import '../models/user.dart';
 import '../models/dog.dart';
 import '../services/auth-service.dart';
+import '../services/dog-service.dart';
 import '../services/location-service.dart';
 import '../services/user-image-service.dart';
 import '../widgets/loading-widget.dart';
 import '../widgets/map-widget.dart';
 import '../widgets/add-dog-btn-widget.dart';
 import '../widgets/add-dog-modal-widget.dart' show AddDogModal, UIDog;
+import '../pages/my_dogs_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -368,6 +370,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             behavior: SnackBarBehavior.floating,
           ),
         );
+      } else if (value == 'dogs') {
+        // Navigation vers la page des chiens
+        _navigateToMyDogsPage();
       } else if (value == 'settings') {
         // Navigation vers la page de paramètres (à implémenter)
         ScaffoldMessenger.of(context).showSnackBar(
@@ -386,6 +391,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         );
       }
     });
+  }
+
+  /// Navigue vers la page des chiens de l'utilisateur
+  void _navigateToMyDogsPage() {
+    if (_currentUser == null || _currentUser!.id == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Impossible de récupérer vos informations utilisateur'),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MyDogsPage(userId: _currentUser!.id!),
+      ),
+    );
   }
 
   @override

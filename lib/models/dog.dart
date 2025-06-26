@@ -21,14 +21,42 @@ class Dog {
     return Dog(
       id: json['id'],
       name: json['name'],
-      birthday: json['birthday'] is String 
-          ? DateTime.parse(json['birthday'])
-          : DateTime.fromMillisecondsSinceEpoch(json['birthday']),
+      birthday: _parseBirthday(json['birthday']),
       description: json['description'] ?? '',
       photo: json['photo'] ?? '',
       breed: json['breed'] ?? '',
       sex: json['sex'] ?? '',
     );
+  }
+
+  // Méthode pour analyser différents formats de date
+  static DateTime _parseBirthday(dynamic birthday) {
+    if (birthday == null) {
+      return DateTime.now(); // Date par défaut
+    }
+    
+    // Si c'est déjà un DateTime
+    if (birthday is DateTime) {
+      return birthday;
+    }
+    
+    // Si c'est une chaîne au format ISO (YYYY-MM-DD)
+    if (birthday is String) {
+      try {
+        return DateTime.parse(birthday);
+      } catch (e) {
+        print('Erreur lors du parsing de la date: $e');
+        return DateTime.now();
+      }
+    }
+    
+    // Si c'est un timestamp en millisecondes
+    if (birthday is int) {
+      return DateTime.fromMillisecondsSinceEpoch(birthday);
+    }
+    
+    // Par défaut
+    return DateTime.now();
   }
 
   Map<String, dynamic> toJson() {
