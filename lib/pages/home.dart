@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -25,6 +26,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _isLoadingLocation = true;
   late AnimationController _fabController;
   late AnimationController _locationButtonController;
+  final GlobalKey<OSMMapWidgetState> _mapKey = GlobalKey<OSMMapWidgetState>();
+  Timer? _locationUpdateTimer;
   
   // Informations utilisateur
   User? _currentUser;
@@ -46,13 +49,49 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     _getCurrentLocation();
     _loadUserData();
+    
+    // Mettre à jour la position toutes les 10 secondes
+    _startLocationUpdates();
   }
 
   @override
   void dispose() {
     _fabController.dispose();
     _locationButtonController.dispose();
+    _locationUpdateTimer?.cancel();
     super.dispose();
+  }
+  
+  void _startLocationUpdates() {
+    // Annuler le timer existant s'il y en a un
+    _locationUpdateTimer?.cancel();
+    
+    // Créer un nouveau timer pour mettre à jour la position périodiquement
+    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _updateCurrentLocation();
+    });
+  }
+  
+  Future<void> _updateCurrentLocation() async {
+    try {
+      final position = await LocationService.getCurrentPosition(
+        timeLimit: const Duration(seconds: 5),
+      );
+
+      if (position != null && mounted) {
+        setState(() {
+          _currentPosition = position;
+        });
+
+        // Mettre à jour le marqueur sur la carte
+        if (_mapKey.currentState != null) {
+          _mapKey.currentState!.updateCurrentPosition(position);
+        }
+      }
+    } catch (e) {
+      // Ignorer les erreurs lors des mises à jour en arrière-plan
+      print('Erreur lors de la mise à jour de la position: $e');
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -70,6 +109,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           _currentPosition = position;
           _isLoadingLocation = false;
         });
+
+        // Mettre à jour le marqueur sur la carte
+        if (_mapKey.currentState != null) {
+          _mapKey.currentState!.updateCurrentPosition(position);
+        }
 
         if (_mapController != null) {
           _mapController!.move(
@@ -123,6 +167,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         LocationService.positionToLatLng(_currentPosition!),
         16.0,
       );
+      
+      // Forcer la mise à jour du marqueur de position
+      if (_mapKey.currentState != null) {
+        _mapKey.currentState!.updateCurrentPosition(_currentPosition!);
+      }
     }
   }
 
@@ -263,6 +312,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         children: [
           // Carte en plein écran
           OSMMapWidget(
+            key: _mapKey,
             onMapReady: _onMapReady,
             initialPosition: _currentPosition,
             showCurrentLocationMarker: true,

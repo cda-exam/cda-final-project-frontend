@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:math' as math;
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import '../constants/colors.dart';
 
 /// Service de gestion des cartes avec OpenStreetMap
 class MapService {
@@ -34,36 +35,9 @@ class MapService {
     Widget? customIcon,
   }) {
     return Marker(
+      key: Key(markerId),
       point: position,
       child: customIcon ?? _defaultMarkerIcon(),
-      width: 40,
-      height: 40,
-    );
-  }
-
-  /// Créer un marqueur pour la position actuelle
-  static Marker createCurrentLocationMarker(LatLng position) {
-    return Marker(
-      point: position,
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF2F5233).withOpacity(0.8),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 3),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.person,
-          color: Colors.white,
-          size: 20,
-        ),
-      ),
       width: 40,
       height: 40,
     );
@@ -76,6 +50,7 @@ class MapService {
     bool isStartPoint = false,
   }) {
     return Marker(
+      key: Key('walk_$walkId'),
       point: position,
       child: Container(
         decoration: BoxDecoration(
