@@ -1,21 +1,25 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import '../constants/colors.dart';
+import '../services/location-service.dart';
+import '../services/walk-service.dart';
+import '../models/walk.dart';
+import '../services/geocoding-service.dart';
 import '../models/user.dart';
 import '../models/dog.dart';
 import '../services/auth-service.dart';
 import '../services/dog-service.dart';
-import '../services/location-service.dart';
 import '../services/user-image-service.dart';
-import '../services/walk-service.dart';
 import '../widgets/loading-widget.dart';
 import '../widgets/map-widget.dart';
 import '../widgets/add-dog-btn-widget.dart';
 import '../widgets/add-dog-modal-widget.dart' show AddDogModal, UIDog;
 import '../widgets/create-walk-form-widget.dart';
+import '../widgets/create-walk-form-modal.dart';
 import '../pages/my_dogs_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -274,99 +278,55 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _handleNewWalk() {
-    if (_currentPosition == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Localisation requise pour commencer une promenade'),
-          backgroundColor: AppColors.warning,
-        ),
-      );
-      return;
-    }
-
     // Afficher le modal avec le formulaire de création de promenade
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-          child: CreateWalkFormWidget(
-            onWalkCreated: (walk, latitude, longitude) async {
-              // Fermer le modal
-              Navigator.pop(context);
-              
-              // Afficher un indicateur de chargement
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Row(
-                    children: [
-                      CircularProgressIndicator(color: Colors.white),
-                      SizedBox(width: 16),
-                      Text('Création de la promenade en cours...'),
-                    ],
-                  ),
-                  backgroundColor: AppColors.primaryGreen,
-                  duration: Duration(seconds: 2),
-                ),
-              );
-              
-              try {
-                // Utiliser les coordonnées du lieu sélectionné si disponibles,
-                // sinon utiliser la position actuelle de l'utilisateur
-                final double walkLatitude = latitude ?? _currentPosition!.latitude;
-                final double walkLongitude = longitude ?? _currentPosition!.longitude;
-                
-                // Appeler l'API pour créer la promenade
-                final createdWalk = await WalkService.createWalk(
-                  walk,
-                  walkLatitude,
-                  walkLongitude,
-                );
-                
-                // Afficher un message de succès
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.white),
-                        SizedBox(width: 8),
-                        Text('Promenade créée avec succès !'),
-                      ],
-                    ),
-                    backgroundColor: AppColors.primaryGreen,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-                
-                // Actualiser la carte si nécessaire
-                // TODO: Ajouter un marqueur pour la nouvelle promenade
-                
-              } catch (e) {
-                // Afficher un message d'erreur
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Row(
-                      children: [
-                        const Icon(Icons.error, color: Colors.white),
-                        const SizedBox(width: 8),
-                        Text('Erreur: ${e.toString()}'),
-                      ],
-                    ),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              }
-            },
-            onCancel: () {
-              Navigator.pop(context);
-            },
-          ),
+        return CreateWalkFormModal(
+          onWalkCreated: _handleWalkCreation,
+          currentPosition: _currentPosition,
         );
       },
     );
+  }
+
+  // Méthode pour gérer la création d'une promenade
+  Future<void> _handleWalkCreation(Walk walk, double? latitude, double? longitude) async {
+    try {
+      // Utiliser les coordonnées fournies ou la position actuelle
+      final double lat = latitude ?? _currentPosition!.latitude;
+      final double lng = longitude ?? _currentPosition!.longitude;
+      
+      // Appeler le service pour créer la promenade
+      final createdWalk = await WalkService.createWalk(
+        walk,
+        lat,
+        lng,
+      );
+
+      if (createdWalk != null) {
+        // Afficher un message de succès
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Promenade créée avec succès !'),
+            backgroundColor: AppColors.primaryGreen,
+          ),
+        );
+
+        // TODO: Mettre à jour la carte avec la nouvelle promenade
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors de la création de la promenade: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _handleMapTap(LatLng tappedPoint) {
