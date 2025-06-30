@@ -3,7 +3,7 @@ import '../models/walk.dart';
 import 'create-walk-form-widget.dart';
 
 class CreateWalkModal extends StatelessWidget {
-  final Function(Walk)? onWalkCreated;
+  final Function(Walk, double?, double?)? onWalkCreated;
 
   const CreateWalkModal({
     Key? key,
@@ -11,7 +11,7 @@ class CreateWalkModal extends StatelessWidget {
   }) : super(key: key);
 
   /// Affiche le modal de création de promenade
-  static Future<void> show(BuildContext context, {Function(Walk)? onWalkCreated}) async {
+  static Future<void> show(BuildContext context, {Function(Walk, double?, double?)? onWalkCreated}) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -38,10 +38,10 @@ class CreateWalkModal extends StatelessWidget {
       ),
       child: SingleChildScrollView(
         child: CreateWalkFormWidget(
-          onWalkCreated: (walk) {
+          onWalkCreated: (walk, latitude, longitude) {
             Navigator.of(context).pop(); // Fermer le modal
             if (onWalkCreated != null) {
-              onWalkCreated!(walk);
+              onWalkCreated!(walk, latitude, longitude);
             }
           },
           onCancel: () {

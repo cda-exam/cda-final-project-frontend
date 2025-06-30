@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
 import '../constants/colors.dart';
 import '../models/walk.dart';
+import '../services/geocoding-service.dart';
+import 'package:latlong2/latlong.dart';
 
 class CreateWalkFormWidget extends StatefulWidget {
-  final Function(Walk)? onWalkCreated;
+  final Function(Walk, double?, double?)? onWalkCreated;
   final VoidCallback? onCancel;
 
   const CreateWalkFormWidget({
@@ -32,6 +35,12 @@ class _CreateWalkFormWidgetState extends State<CreateWalkFormWidget> {
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
   TimeOfDay _selectedTime = TimeOfDay.now();
   
+  // Variables pour la recherche de lieux
+  List<Place> _searchResults = [];
+  bool _isSearching = false;
+  Timer? _debounce;
+  Place? _selectedPlace;
+  
   @override
   void initState() {
     super.initState();
@@ -41,6 +50,9 @@ class _CreateWalkFormWidgetState extends State<CreateWalkFormWidget> {
     _timeController.text = '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}';
     _durationController.text = '60'; // 60 minutes par défaut
     _participantsMaxController.text = '5'; // 5 participants max par défaut
+    
+    // Ajouter un listener pour la recherche de lieux
+    _locationController.addListener(_onLocationInputChanged);
   }
   
   @override
@@ -51,7 +63,59 @@ class _CreateWalkFormWidgetState extends State<CreateWalkFormWidget> {
     _participantsMaxController.dispose();
     _descriptionController.dispose();
     _locationController.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+  
+  // Méthode appelée lorsque le texte du champ de lieu change
+  void _onLocationInputChanged() {
+    // Annuler le timer précédent s'il existe
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    
+    // Créer un nouveau timer pour éviter trop de requêtes
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      final query = _locationController.text;
+      if (query.length >= 3) {
+        _searchPlaces(query);
+      } else {
+        setState(() {
+          _searchResults = [];
+          _isSearching = false;
+        });
+      }
+    });
+  }
+  
+  // Recherche de lieux via l'API
+  Future<void> _searchPlaces(String query) async {
+    if (query.isEmpty) return;
+    
+    setState(() {
+      _isSearching = true;
+    });
+    
+    try {
+      final results = await GeocodingService.searchPlaces(query);
+      setState(() {
+        _searchResults = results;
+        _isSearching = false;
+      });
+    } catch (e) {
+      setState(() {
+        _searchResults = [];
+        _isSearching = false;
+      });
+      print('Erreur lors de la recherche de lieux: $e');
+    }
+  }
+  
+  // Sélectionner un lieu dans les résultats
+  void _selectPlace(Place place) {
+    setState(() {
+      _selectedPlace = place;
+      _locationController.text = place.displayName;
+      _searchResults = []; // Effacer les résultats après sélection
+    });
   }
   
   // Sélectionner une date
@@ -122,6 +186,15 @@ class _CreateWalkFormWidgetState extends State<CreateWalkFormWidget> {
         _selectedTime.minute,
       );
       
+      // Coordonnées du lieu sélectionné ou valeurs par défaut
+      double? latitude;
+      double? longitude;
+      
+      if (_selectedPlace != null) {
+        latitude = _selectedPlace!.latitude;
+        longitude = _selectedPlace!.longitude;
+      }
+      
       // Créer l'objet Walk
       final walk = Walk(
         date: dateTime,
@@ -131,9 +204,9 @@ class _CreateWalkFormWidgetState extends State<CreateWalkFormWidget> {
         location: _locationController.text,
       );
       
-      // Appeler le callback
+      // Appeler le callback avec les coordonnées
       if (widget.onWalkCreated != null) {
-        widget.onWalkCreated!(walk);
+        widget.onWalkCreated!(walk, latitude, longitude);
       }
     }
   }
@@ -275,21 +348,76 @@ class _CreateWalkFormWidgetState extends State<CreateWalkFormWidget> {
             const SizedBox(height: 16),
             
             // Lieu
-            TextFormField(
-              controller: _locationController,
-              decoration: InputDecoration(
-                labelText: 'Lieu',
-                prefixIcon: const Icon(Icons.location_on, color: AppColors.primaryGreen),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: _locationController,
+                  decoration: InputDecoration(
+                    labelText: 'Lieu',
+                    hintText: 'Commencez à taper pour rechercher...',
+                    prefixIcon: const Icon(Icons.location_on, color: AppColors.primaryGreen),
+                    suffixIcon: _isSearching 
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primaryGreen,
+                          ),
+                        ) 
+                      : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Veuillez entrer un lieu';
+                    }
+                    return null;
+                  },
                 ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez entrer un lieu';
-                }
-                return null;
-              },
+                
+                // Afficher les résultats de recherche
+                if (_searchResults.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(top: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      itemCount: _searchResults.length,
+                      itemBuilder: (context, index) {
+                        final place = _searchResults[index];
+                        return ListTile(
+                          dense: true,
+                          title: Text(
+                            place.displayName,
+                            style: const TextStyle(fontSize: 14),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            '${place.city ?? ''} ${place.postcode ?? ''}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          onTap: () => _selectPlace(place),
+                        );
+                      },
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             

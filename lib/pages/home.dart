@@ -293,7 +293,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             borderRadius: BorderRadius.circular(16.0),
           ),
           child: CreateWalkFormWidget(
-            onWalkCreated: (walk) async {
+            onWalkCreated: (walk, latitude, longitude) async {
               // Fermer le modal
               Navigator.pop(context);
               
@@ -313,11 +313,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               );
               
               try {
+                // Utiliser les coordonnées du lieu sélectionné si disponibles,
+                // sinon utiliser la position actuelle de l'utilisateur
+                final double walkLatitude = latitude ?? _currentPosition!.latitude;
+                final double walkLongitude = longitude ?? _currentPosition!.longitude;
+                
                 // Appeler l'API pour créer la promenade
                 final createdWalk = await WalkService.createWalk(
                   walk,
-                  _currentPosition!.latitude,
-                  _currentPosition!.longitude,
+                  walkLatitude,
+                  walkLongitude,
                 );
                 
                 // Afficher un message de succès
