@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 class ApiService {
   static String? _authToken;
   static const String _baseUrl = kDebugMode
-      ? 'http://192.168.1.170:8080'  // Adresse spéciale qui pointe vers l'hôte depuis l'émulateur Android
+      ? 'http://192.168.119.97:8080'  // Adresse spéciale qui pointe vers l'hôte depuis l'émulateur Android
       : 'https://votre-api-production.com';
 
   static const Duration _timeout = Duration(seconds: 30);

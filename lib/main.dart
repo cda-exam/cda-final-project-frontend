@@ -75,10 +75,13 @@ class MyApp extends StatelessWidget {
           builder: (context, authProvider, child) {
             // Initialiser et démarrer la validation périodique
             if (authProvider.state.isInitial) {
-              authProvider.initialize().then((_) {
-                if (authProvider.isAuthenticated) {
-                  TokenValidator.startPeriodicValidation(authProvider);
-                }
+              // Utiliser Future.microtask pour reporter l'appel après la phase de build
+              Future.microtask(() {
+                authProvider.initialize().then((_) {
+                  if (authProvider.isAuthenticated) {
+                    TokenValidator.startPeriodicValidation(authProvider);
+                  }
+                });
               });
               return const Scaffold(
                 body: Center(
