@@ -45,6 +45,7 @@ dependencies:
   flutter_map_cancellable_tile_provider: ^2.0.0
 
   http_parser: any
+  intl: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

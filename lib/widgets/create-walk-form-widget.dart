@@ -4,17 +4,16 @@ import 'dart:async';
 import '../constants/colors.dart';
 import '../models/walk.dart';
 import '../services/geocoding-service.dart';
-import 'package:latlong2/latlong.dart';
 
 class CreateWalkFormWidget extends StatefulWidget {
   final Function(Walk, double?, double?)? onWalkCreated;
   final VoidCallback? onCancel;
 
   const CreateWalkFormWidget({
-    Key? key,
+    super.key,
     this.onWalkCreated,
     this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   State<CreateWalkFormWidget> createState() => _CreateWalkFormWidgetState();

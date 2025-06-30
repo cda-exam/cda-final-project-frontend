@@ -3,22 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
 import '../constants/colors.dart';
 import '../services/location-service.dart';
 import '../services/walk-service.dart';
 import '../models/walk.dart';
-import '../services/geocoding-service.dart';
 import '../models/user.dart';
-import '../models/dog.dart';
 import '../services/auth-service.dart';
-import '../services/dog-service.dart';
 import '../services/user-image-service.dart';
 import '../widgets/loading-widget.dart';
 import '../widgets/map-widget.dart';
 import '../widgets/add-dog-btn-widget.dart';
 import '../widgets/add-dog-modal-widget.dart' show AddDogModal, UIDog;
-import '../widgets/create-walk-form-widget.dart';
 import '../widgets/create-walk-form-modal.dart';
 import '../pages/my_dogs_page.dart';
 
@@ -306,19 +301,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         lng,
       );
 
-      if (createdWalk != null) {
-        // Afficher un message de succès
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Promenade créée avec succès !'),
-            backgroundColor: AppColors.primaryGreen,
-          ),
-        );
+      // Afficher un message de succès
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Promenade créée avec succès !'),
+          backgroundColor: AppColors.primaryGreen,
+        ),
+      );
 
-        // TODO: Mettre à jour la carte avec la nouvelle promenade
-      }
-    } catch (e) {
+      // TODO: Mettre à jour la carte avec la nouvelle promenade
+        } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

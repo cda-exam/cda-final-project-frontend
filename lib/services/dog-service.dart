@@ -1,7 +1,7 @@
 import 'dart:io';
 import '../models/dog.dart';
 import 'api-service.dart';
-import 'dart:convert'; // Import pour jsonDecode
+// Import pour jsonDecode
 
 class DogService {
   /// Ajoute un ou plusieurs chiens à un utilisateur
@@ -9,7 +9,7 @@ class DogService {
   static Future<void> addDogsToUser(String userId, List<Dog> dogs) async {
     try {
       // Vérifier si userId est vide ou null
-      if (userId == null || userId.isEmpty) {
+      if (userId.isEmpty) {
         throw Exception('userId ne peut pas être vide ou null');
       }
       
@@ -36,7 +36,7 @@ class DogService {
   static Future<void> addDogToUser(String userId, Dog dog) async {
     try {
       // Vérifier si userId est vide ou null
-      if (userId == null || userId.isEmpty) {
+      if (userId.isEmpty) {
         throw Exception('userId ne peut pas être vide ou null');
       }
       
@@ -64,7 +64,7 @@ class DogService {
   static Future<List<Dog>> getUserDogs(String userId) async {
     try {
       // Vérifier si userId est vide ou null
-      if (userId == null || userId.isEmpty) {
+      if (userId.isEmpty) {
         throw Exception('userId ne peut pas être vide ou null');
       }
       

@@ -7,9 +7,9 @@ class CreateWalkModal extends StatelessWidget {
   final Function(Walk, double?, double?)? onWalkCreated;
 
   const CreateWalkModal({
-    Key? key,
+    super.key,
     this.onWalkCreated,
-  }) : super(key: key);
+  });
 
   /// Affiche le modal de création de promenade en plein écran
   static Future<void> show(BuildContext context, {Function(Walk, double?, double?)? onWalkCreated}) async {

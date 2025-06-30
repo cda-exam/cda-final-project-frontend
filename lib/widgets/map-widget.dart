@@ -3,7 +3,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import '../services/map-service.dart';
-import '../services/location-service.dart';
 import '../widgets/pulsating-location-marker.dart';
 
 /// Interface publique pour accéder aux méthodes du widget de carte

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../models/walk.dart';
 import 'api-service.dart';
 import 'auth-service.dart';
@@ -12,7 +11,7 @@ class WalkService {
     try {
       // Récupérer les données d'authentification
       final authData = await AuthService().getStoredAuthData();
-      if (authData == null || authData.token == null) {
+      if (authData.token == null) {
         throw Exception('Utilisateur non authentifié');
       }
 

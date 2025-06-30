@@ -10,10 +10,10 @@ class CreateWalkFormModal extends StatefulWidget {
   final Position? currentPosition;
 
   const CreateWalkFormModal({
-    Key? key,
+    super.key,
     required this.onWalkCreated,
     required this.currentPosition,
-  }) : super(key: key);
+  });
 
   @override
   State<CreateWalkFormModal> createState() => _CreateWalkFormModalState();
